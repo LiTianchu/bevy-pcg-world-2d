@@ -99,6 +99,22 @@ impl MapTiles {
 }
 
 #[derive(Component)]
+struct Movable {
+    speed: f32,
+}
+
+impl Movable {
+    pub fn new() -> Self {
+        Self { speed: 1.0 }
+    }
+
+    pub fn with_speed(mut self, new_speed: f32) -> Self {
+        self.speed = new_speed;
+        self
+    }
+}
+
+#[derive(Component)]
 struct Player {
     name: String,
 }
@@ -162,6 +178,7 @@ fn spawn_player(mut commands: Commands, map: Res<MapTiles>) {
             custom_size: Some(TILE_DIMESNION),
             ..default()
         },
+        Movable::new().with_speed(2.0),
     ));
 }
 
@@ -187,18 +204,48 @@ fn draw_map(mut commands: Commands, map: Res<MapTiles>) {
     }
 }
 
-pub struct MapPlugin;
-impl Plugin for MapPlugin {
+fn handle_player_movement(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    query: Query<(&mut Transform, &Player, &Movable)>,
+) {
+    let mut direction: Vec2 = Vec2::ZERO;
+    if keyboard_input.pressed(KeyCode::KeyW) {
+        direction.y = 1.0;
+    }
+
+    if keyboard_input.pressed(KeyCode::KeyS) {
+        direction.y = -1.0;
+    }
+
+    if keyboard_input.pressed(KeyCode::KeyA) {
+        direction.x = -1.0;
+    }
+
+    if keyboard_input.pressed(KeyCode::KeyD) {
+        direction.x = 1.0;
+    }
+
+    direction = direction.normalize_or_zero();
+
+    for (mut transform, _player, movable) in query {
+        transform.translation.x = direction.x * movable.speed;
+        transform.translation.y = direction.y * movable.speed;
+    }
+}
+
+pub struct WorldPlugin;
+impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
         let seed: u32 = 1234;
         app.insert_resource(generate_map(seed, DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT))
-            .add_systems(Startup, (setup_camera, draw_map, spawn_player).chain());
+            .add_systems(Startup, (setup_camera, draw_map, spawn_player).chain())
+            .add_systems(Update, handle_player_movement);
     }
 }
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(MapPlugin)
+        .add_plugins(WorldPlugin)
         .run();
 }
