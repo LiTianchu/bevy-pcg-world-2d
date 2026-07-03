@@ -1,13 +1,19 @@
-use bevy::{prelude::*, reflect::map::Map};
-use noise::{NoiseFn, Perlin, Seedable};
+use bevy::prelude::*;
+use noise::{NoiseFn, Perlin};
+use std::collections::hash_set::HashSet;
 use std::fmt;
 
 const DEFAULT_GRID_WIDTH: usize = 64;
 const DEFAULT_GRID_HEIGHT: usize = 64;
 const TILE_SIZE: f32 = 16.0;
+const TILE_DIMESNION: Vec2 = Vec2::splat(TILE_SIZE);
+const DEFAULT_GRID_CENTER: Vec2 = Vec2 {
+    x: (DEFAULT_GRID_WIDTH as f32 * TILE_SIZE) / 2.0,
+    y: (DEFAULT_GRID_HEIGHT as f32 * TILE_SIZE) / 2.0,
+};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-enum Tile {
+pub enum Tile {
     Wall,
     Floor,
     Void,
@@ -29,12 +35,85 @@ struct MapTiles {
 }
 
 impl MapTiles {
-    pub fn new(tiles: Vec<Vec<Tile>>) -> Self {
-        Self { tiles }
+    pub fn new() -> Self {
+        Self {
+            tiles: vec![vec![]],
+        }
+    }
+
+    pub fn with_tiles(mut self, tiles: Vec<Vec<Tile>>) -> Self {
+        self.tiles = tiles;
+        self
+    }
+
+    pub fn set_tile(&mut self, x: usize, y: usize, tile: Tile) -> Result {
+        let curr_tile: Tile = self.tile(x, y)?;
+        if curr_tile != tile {
+            self.tiles[y][x] = tile;
+        }
+        Ok(())
+    }
+
+    pub fn dimension(&self) -> UVec2 {
+        if self.tiles.len() == 0 {
+            UVec2 { x: 0, y: 0 }
+        } else {
+            UVec2 {
+                x: self.tiles[0].len() as u32,
+                y: self.tiles.len() as u32,
+            }
+        }
+    }
+
+    pub fn tiles_iter(&self) -> impl Iterator<Item = (UVec2, Tile)> + '_ {
+        self.tiles.iter().enumerate().flat_map(|(y, row)| {
+            row.iter()
+                .enumerate()
+                .map(move |(x, &tile)| (UVec2::new(x as u32, y as u32), tile))
+        })
+    }
+
+    pub fn tile(&self, x: usize, y: usize) -> Result<Tile> {
+        if self.tiles.len() == 0 {
+            return Err("Grid is empty".into());
+        }
+        if y < self.tiles.len() && x < self.tiles[0].len() {
+            Ok(self.tiles[y][x])
+        } else {
+            Err("Tile coordinate out of boundary".into())
+        }
+    }
+
+    pub fn tiles_of_type(&self, tile_type: Tile) -> HashSet<UVec2> {
+        let dim: UVec2 = self.dimension();
+        let mut found_set: HashSet<UVec2> = HashSet::new();
+        for y in 0..dim.y {
+            for x in 0..dim.x {
+                if self.tiles[y as usize][x as usize] == tile_type {
+                    found_set.insert(UVec2 { x: x, y: y });
+                }
+            }
+        }
+        return found_set;
     }
 }
 
-fn generate_map(seed: u32, grid_width: usize, grid_height: usize) -> Vec<Vec<Tile>> {
+#[derive(Component)]
+struct Player {
+    name: String,
+}
+
+impl Player {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self { name: name.into() }
+    }
+
+    pub fn name(&self) -> &str {
+        return self.name.as_ref();
+    }
+}
+
+fn generate_map(seed: u32, grid_width: usize, grid_height: usize) -> MapTiles {
     let perlin = Perlin::new(seed);
     let mut map = vec![vec![Tile::Void; grid_width]; grid_height];
 
@@ -46,28 +125,65 @@ fn generate_map(seed: u32, grid_width: usize, grid_height: usize) -> Vec<Vec<Til
         }
     }
 
-    return map;
+    return MapTiles::new().with_tiles(map);
+}
+
+fn setup_camera(mut commands: Commands) {
+    commands.spawn((
+        Camera2d,
+        Projection::from(OrthographicProjection::default_2d()),
+        Transform::from_xyz(DEFAULT_GRID_CENTER.x, DEFAULT_GRID_CENTER.y, 100.0),
+    ));
+}
+
+pub fn grid_pos(x: usize, y: usize) -> Vec3 {
+    return Vec3 {
+        x: x as f32 * TILE_SIZE,
+        y: y as f32 * TILE_SIZE,
+        z: 0.0,
+    };
+}
+
+fn spawn_player(mut commands: Commands, map: Res<MapTiles>) {
+    let player: Player = Player::new("Player");
+    let tiles: HashSet<UVec2> = map.tiles_of_type(Tile::Floor);
+
+    let default_spawn_place: UVec2 = UVec2 { x: 0, y: 0 };
+    let spawn_place: UVec2 = tiles.iter().next().copied().unwrap_or(default_spawn_place);
+
+    println!("Player spawned: {}", player.name());
+    commands.spawn((
+        player,
+        Transform::from_translation(
+            grid_pos(spawn_place.x as usize, spawn_place.y as usize).with_z(1.0),
+        ),
+        Sprite {
+            color: Color::srgba(0.8, 0.2, 0.1, 1.0),
+            custom_size: Some(TILE_DIMESNION),
+            ..default()
+        },
+    ));
+}
+
+pub fn tile_appearance(tile: Tile) -> Color {
+    let color: Color = match tile {
+        Tile::Wall => Color::srgba(0.5, 0.4, 0.6, 1.0),
+        Tile::Floor => Color::srgba(0.2, 0.4, 0.9, 1.0),
+        Tile::Void => Color::srgba(0.0, 0.0, 0.0, 1.0),
+    };
+    return color;
 }
 
 fn draw_map(mut commands: Commands, map: Res<MapTiles>) {
-    commands.spawn(Camera2d);
-    for y in 0..map.tiles.len() {
-        for x in 0..map.tiles[0].len() {
-            let tile: Tile = map.tiles[y][x];
-            let color: Color = match tile {
-                Tile::Wall => Color::srgba(0.5, 0.4, 0.6, 1.0),
-                Tile::Floor => Color::srgba(0.2, 0.4, 0.9, 1.0),
-                Tile::Void => Color::srgba(0.0, 0.0, 0.0, 1.0),
-            };
-            commands.spawn((
-                Sprite {
-                    color: color,
-                    custom_size: Some(Vec2::splat(TILE_SIZE)),
-                    ..default()
-                },
-                Transform::from_xyz((x as f32) * TILE_SIZE, (y as f32) * TILE_SIZE, 0.0),
-            ));
-        }
+    for (coord, tile) in map.tiles_iter() {
+        commands.spawn((
+            Sprite {
+                color: tile_appearance(tile),
+                custom_size: Some(TILE_DIMESNION),
+                ..default()
+            },
+            Transform::from_translation(grid_pos(coord.x as usize, coord.y as usize)),
+        ));
     }
 }
 
@@ -75,12 +191,8 @@ pub struct MapPlugin;
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         let seed: u32 = 1234;
-        app.insert_resource(MapTiles::new(generate_map(
-            seed,
-            DEFAULT_GRID_WIDTH,
-            DEFAULT_GRID_HEIGHT,
-        )))
-        .add_systems(Startup, draw_map);
+        app.insert_resource(generate_map(seed, DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT))
+            .add_systems(Startup, (setup_camera, draw_map, spawn_player).chain());
     }
 }
 
