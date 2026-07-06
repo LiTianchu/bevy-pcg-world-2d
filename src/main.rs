@@ -99,6 +99,24 @@ impl MapTiles {
 }
 
 #[derive(Component)]
+struct ObjectOnGrid {
+    internal_translation: Vec3,
+}
+
+impl ObjectOnGrid {
+    pub fn new() -> Self {
+        Self {
+            internal_translation: Vec3::ZERO,
+        }
+    }
+
+    pub fn with_internal_translation(mut self, translation: Vec3) -> Self {
+        self.internal_translation = translation;
+        self
+    }
+}
+
+#[derive(Component)]
 struct Movable {
     speed: f32,
 }
@@ -125,7 +143,7 @@ impl Player {
     }
 
     pub fn name(&self) -> &str {
-        return self.name.as_ref();
+        self.name.as_str()
     }
 }
 
@@ -152,12 +170,18 @@ fn setup_camera(mut commands: Commands) {
     ));
 }
 
-pub fn grid_pos(x: usize, y: usize) -> Vec3 {
+pub fn grid_to_pos(x: usize, y: usize) -> Vec3 {
     return Vec3 {
         x: x as f32 * TILE_SIZE,
         y: y as f32 * TILE_SIZE,
         z: 0.0,
     };
+}
+
+pub fn pos_to_grid(pos: Vec3) -> Vec3 {
+    let x: f32 = (pos.x / TILE_SIZE).round();
+    let y: f32 = (pos.y / TILE_SIZE).round();
+    return Vec3 { x, y, z: pos.z };
 }
 
 fn spawn_player(mut commands: Commands, map: Res<MapTiles>) {
@@ -167,18 +191,25 @@ fn spawn_player(mut commands: Commands, map: Res<MapTiles>) {
     let default_spawn_place: UVec2 = UVec2 { x: 0, y: 0 };
     let spawn_place: UVec2 = tiles.iter().next().copied().unwrap_or(default_spawn_place);
 
-    println!("Player spawned: {}", player.name());
+    println!(
+        "Player spawned: {}, Position: {}",
+        player.name(),
+        spawn_place
+    );
+
+    let spawn_translation: Vec3 =
+        grid_to_pos(spawn_place.x as usize, spawn_place.y as usize).with_z(1.0);
+
     commands.spawn((
         player,
-        Transform::from_translation(
-            grid_pos(spawn_place.x as usize, spawn_place.y as usize).with_z(1.0),
-        ),
+        Transform::from_translation(spawn_translation),
         Sprite {
             color: Color::srgba(0.8, 0.2, 0.1, 1.0),
             custom_size: Some(TILE_DIMESNION),
             ..default()
         },
         Movable::new().with_speed(2.0),
+        ObjectOnGrid::new().with_internal_translation(spawn_translation),
     ));
 }
 
@@ -199,14 +230,14 @@ fn draw_map(mut commands: Commands, map: Res<MapTiles>) {
                 custom_size: Some(TILE_DIMESNION),
                 ..default()
             },
-            Transform::from_translation(grid_pos(coord.x as usize, coord.y as usize)),
+            Transform::from_translation(grid_to_pos(coord.x as usize, coord.y as usize)),
         ));
     }
 }
 
 fn handle_player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    query: Query<(&mut Transform, &Player, &Movable)>,
+    query: Query<(&mut Transform, &Player, &Movable, &mut ObjectOnGrid)>,
 ) {
     let mut direction: Vec2 = Vec2::ZERO;
     if keyboard_input.pressed(KeyCode::KeyW) {
@@ -227,9 +258,12 @@ fn handle_player_movement(
 
     direction = direction.normalize_or_zero();
 
-    for (mut transform, _player, movable) in query {
-        transform.translation.x = direction.x * movable.speed;
-        transform.translation.y = direction.y * movable.speed;
+    for (mut transform, _player, movable, mut object_on_grid) in query {
+        object_on_grid.internal_translation.x += direction.x * movable.speed;
+        object_on_grid.internal_translation.y += direction.y * movable.speed;
+        transform.translation = pos_to_grid(object_on_grid.internal_translation);
+        println!("Player movement direction: {:?}", direction);
+        println!("Player moved to position: {:?}", transform.translation);
     }
 }
 
