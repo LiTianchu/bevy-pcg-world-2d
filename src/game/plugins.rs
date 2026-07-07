@@ -19,6 +19,13 @@ impl Plugin for WorldPlugin {
             )
                 .chain(),
         )
-        .add_systems(Update, game::control::systems::handle_player_movement);
+        .add_systems(
+            Update,
+            (
+                game::control::systems::handle_player_movement,
+                game::camera::systems::camera_follow_player,
+            )
+                .chain(),
+        );
     }
 }
