@@ -10,7 +10,7 @@ use bevy::prelude::*;
 pub fn handle_player_movement(
     time: Res<Time>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    terrain: Res<terrain::resources::Terrain>,
+    terrain_chunk: Res<terrain::resources::TerrainChunk>,
     query: Query<(&mut Transform, &Player, &mut Movable, &mut ObjectOnGrid)>,
 ) {
     let mut direction: Vec2 = Vec2::ZERO;
@@ -58,7 +58,7 @@ pub fn handle_player_movement(
 
         let next_cell_coord: UVec2 = terrain::utils::pos_to_cell_coord(next_grid_pos);
 
-        let is_tile_walkable = terrain
+        let is_tile_walkable = terrain_chunk
             .is_tile_walkable(next_cell_coord.x as usize, next_cell_coord.y as usize)
             .unwrap_or(false);
 

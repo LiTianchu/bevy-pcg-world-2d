@@ -8,9 +8,9 @@ use crate::{
 use bevy::prelude::*;
 use std::collections::HashSet;
 
-pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::Terrain>) {
+pub fn spawn_player(mut commands: Commands, chunk: Res<terrain::resources::TerrainChunk>) {
     let player: Player = Player::new("Player");
-    let tiles: HashSet<UVec2> = terrain.tiles_of_type(terrain::tile::Tile::Floor);
+    let tiles: HashSet<UVec2> = chunk.tiles_of_type(terrain::tile::Tile::Floor);
 
     let default_spawn_place: UVec2 = UVec2 { x: 0, y: 0 };
     let spawn_place: UVec2 = tiles.iter().next().copied().unwrap_or(default_spawn_place);

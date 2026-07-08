@@ -1,9 +1,9 @@
-use crate::pcg::terrain::{constants, resources::Terrain, tile::tile_appearance, utils};
+use crate::pcg::terrain::{constants, resources::TerrainChunk, tile::tile_appearance, utils};
 
 use bevy::prelude::*;
 
-pub fn draw_terrain(mut commands: Commands, terrain: Res<Terrain>) {
-    for (coord, tile) in terrain.tiles_iter() {
+pub fn draw_terrain_chunk(mut commands: Commands, terrain_chunk: Res<TerrainChunk>) {
+    for (coord, tile) in terrain_chunk.tiles_iter() {
         commands.spawn((
             Sprite {
                 color: tile_appearance(tile),
@@ -18,6 +18,6 @@ pub fn draw_terrain(mut commands: Commands, terrain: Res<Terrain>) {
     }
 }
 
-pub fn print_terrain(_commands: Commands, terrain: Res<Terrain>) {
-    println!("{}", terrain.to_string());
+pub fn print_terrain_chunk(terrain_chunk: Res<TerrainChunk>) {
+    println!("{}", terrain_chunk.to_string());
 }

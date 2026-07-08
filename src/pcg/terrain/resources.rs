@@ -3,12 +3,13 @@ use bevy::prelude::*;
 use std::collections::HashSet;
 use std::fmt::{self, Write};
 
+// Terrain chunk for wave function collapse generation, pivoted at lower left corner (0, 0)
 #[derive(Resource)]
-pub struct Terrain {
+pub struct TerrainChunk {
     tiles: Vec<Vec<Tile>>,
 }
 
-impl Terrain {
+impl TerrainChunk {
     pub fn new() -> Self {
         Self {
             tiles: vec![vec![]],
@@ -82,7 +83,7 @@ impl Terrain {
     }
 }
 
-impl fmt::Display for Terrain {
+impl fmt::Display for TerrainChunk {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for row in self.tiles.iter().rev() {
             for &t in row {

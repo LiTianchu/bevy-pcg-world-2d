@@ -1,14 +1,14 @@
-use crate::pcg::terrain::{constants, resources::Terrain, tile, tile::Tile};
+use crate::pcg::terrain::{constants, resources::TerrainChunk, tile, tile::Tile};
 use bevy::prelude::*;
 use noise::{NoiseFn, Perlin};
 use rand::prelude::*;
 
-pub fn generate_terrain(grid_width: usize, grid_height: usize) -> Terrain {
+pub fn generate_terrain(grid_width: usize, grid_height: usize) -> TerrainChunk {
     let mut rng = rand::rng();
     let seed: u32 = rng.random();
     return generate_terrain_seeded(seed, grid_width, grid_height);
 }
-pub fn generate_terrain_seeded(seed: u32, grid_width: usize, grid_height: usize) -> Terrain {
+pub fn generate_terrain_seeded(seed: u32, grid_width: usize, grid_height: usize) -> TerrainChunk {
     let perlin = Perlin::new(seed);
     let mut terrain_tiles = vec![vec![Tile::Void; grid_width]; grid_height];
 
@@ -20,7 +20,7 @@ pub fn generate_terrain_seeded(seed: u32, grid_width: usize, grid_height: usize)
         }
     }
 
-    return Terrain::new().with_tiles(terrain_tiles);
+    return TerrainChunk::new().with_tiles(terrain_tiles);
 }
 
 pub fn cell_coord_to_pos(x: usize, y: usize) -> Vec3 {
