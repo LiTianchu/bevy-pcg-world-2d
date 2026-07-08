@@ -8,8 +8,11 @@ use crate::{
 use bevy::prelude::*;
 use std::collections::HashSet;
 
-pub fn spawn_player(mut commands: Commands, chunk: Res<terrain::resources::TerrainChunk>) {
+pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::TerrainWorld>) {
     let player: Player = Player::new("Player");
+
+    let chunk: &terrain::resources::TerrainChunk = terrain.chunk_at(IVec2 { x: 0, y: 0 }).unwrap();
+
     let tiles: HashSet<UVec2> = chunk.tiles_of_type(terrain::tile::Tile::Floor);
 
     let default_spawn_place: UVec2 = UVec2 { x: 0, y: 0 };
@@ -22,7 +25,7 @@ pub fn spawn_player(mut commands: Commands, chunk: Res<terrain::resources::Terra
     );
 
     let spawn_translation: Vec3 =
-        terrain::utils::cell_coord_to_pos(spawn_place.x as usize, spawn_place.y as usize)
+        terrain::utils::cell_to_pos_local(spawn_place.x as usize, spawn_place.y as usize)
             .with_z(1.0);
 
     let player_initial_speed: f32 = 7.0;

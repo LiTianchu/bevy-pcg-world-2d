@@ -10,10 +10,12 @@ use bevy::prelude::*;
 pub fn handle_player_movement(
     time: Res<Time>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    terrain_chunk: Res<terrain::resources::TerrainChunk>,
+    terrain: Res<terrain::resources::TerrainWorld>,
     query: Query<(&mut Transform, &Player, &mut Movable, &mut ObjectOnGrid)>,
 ) {
     let mut direction: Vec2 = Vec2::ZERO;
+    let terrain_chunk: &terrain::resources::TerrainChunk =
+        terrain.chunk_at(IVec2 { x: 0, y: 0 }).unwrap();
 
     if keyboard_input.pressed(KeyCode::KeyW) {
         direction.y = 1.0;
@@ -48,7 +50,7 @@ pub fn handle_player_movement(
         });
 
         // precompute the next grid pos
-        let next_grid_pos: Vec3 = terrain::utils::round_pos_to_cell(
+        let next_grid_pos: Vec3 = terrain::utils::cell_round(
             Vec3 {
                 x: direction.x * terrain::constants::TILE_SIZE,
                 y: direction.y * terrain::constants::TILE_SIZE,
@@ -56,7 +58,7 @@ pub fn handle_player_movement(
             } + object_on_grid.internal_translation,
         );
 
-        let next_cell_coord: UVec2 = terrain::utils::pos_to_cell_coord(next_grid_pos);
+        let next_cell_coord: UVec2 = terrain::utils::pos_to_cell_local(next_grid_pos);
 
         let is_tile_walkable = terrain_chunk
             .is_tile_walkable(next_cell_coord.x as usize, next_cell_coord.y as usize)

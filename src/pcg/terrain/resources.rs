@@ -1,7 +1,84 @@
-use crate::pcg::terrain::{tile, tile::Tile};
+use crate::pcg::terrain::{constants, tile, tile::Tile};
 use bevy::prelude::*;
-use std::collections::HashSet;
+use noise::{NoiseFn, Perlin};
+use rand::prelude::*;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Write};
+
+#[derive(Resource)]
+pub struct TerrainWorld {
+    chunks: HashMap<IVec2, TerrainChunk>,
+    chunk_dimension: UVec2,
+}
+
+impl TerrainWorld {
+    pub fn new() -> Self {
+        Self {
+            chunks: HashMap::new(),
+            chunk_dimension: UVec2 {
+                x: constants::DEFAULT_CHUNK_WIDTH,
+                y: constants::DEFAULT_CHUNK_HEIGHT,
+            },
+        }
+    }
+
+    pub fn chunk_at(&self, coord: IVec2) -> Option<&TerrainChunk> {
+        self.chunks.get(&coord)
+    }
+
+    pub fn chunk_dimension(&self) -> UVec2 {
+        self.chunk_dimension.clone()
+    }
+
+    pub fn chunks_iter(&self) -> impl Iterator<Item = (&IVec2, &TerrainChunk)> + '_ {
+        self.chunks.iter()
+    }
+
+    pub fn generate_chunk_cluster_at(&mut self, center_chunk: IVec2, extent: u32) {
+        for x in (center_chunk.x - extent as i32)..=(center_chunk.x + extent as i32) {
+            for y in (center_chunk.y - extent as i32)..=(center_chunk.y + extent as i32) {
+                self.generate_chunk_if_not_exist(IVec2 { x, y });
+            }
+        }
+    }
+
+    pub fn generate_chunk_if_not_exist(&mut self, coord: IVec2) {
+        if self.chunks.contains_key(&coord) {
+            return;
+        }
+
+        let new_chunk: TerrainChunk = self.get_new_chunk();
+        self.chunks.entry(coord).or_insert(new_chunk);
+    }
+
+    fn get_new_chunk(&mut self) -> TerrainChunk {
+        let grid_width = self.chunk_dimension.x;
+        let grid_height = self.chunk_dimension.y;
+        let mut rng = rand::rng();
+        let seed: u32 = rng.random();
+        return self.get_new_chunk_seeded(seed, grid_width as usize, grid_height as usize);
+    }
+
+    fn get_new_chunk_seeded(
+        &mut self,
+        seed: u32,
+        grid_width: usize,
+        grid_height: usize,
+    ) -> TerrainChunk {
+        let perlin = Perlin::new(seed);
+        let mut terrain_tiles = vec![vec![Tile::Void; grid_width]; grid_height];
+
+        let scale = 0.1;
+        for y in 0..grid_height {
+            for x in 0..grid_width {
+                let value = perlin.get([x as f64 * scale, y as f64 * scale]);
+                terrain_tiles[y][x] = tile::get_tile_by_f64(value);
+            }
+        }
+
+        return TerrainChunk::new().with_tiles(terrain_tiles);
+    }
+}
 
 // Terrain chunk for wave function collapse generation, pivoted at lower left corner (0, 0)
 #[derive(Resource)]
@@ -85,6 +162,7 @@ impl TerrainChunk {
 
 impl fmt::Display for TerrainChunk {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // need to reverse the rows as 2d map array's first row should be printed at the bottom
         for row in self.tiles.iter().rev() {
             for &t in row {
                 f.write_char(tile::tile_appearance_ascii(t))?;
