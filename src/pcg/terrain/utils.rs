@@ -1,8 +1,14 @@
-use crate::pcg::terrain::{constants, resources::Terrain, tile::Tile};
+use crate::pcg::terrain::{constants, resources::Terrain, tile, tile::Tile};
 use bevy::prelude::*;
 use noise::{NoiseFn, Perlin};
+use rand::prelude::*;
 
-pub fn generate_terrain(seed: u32, grid_width: usize, grid_height: usize) -> Terrain {
+pub fn generate_terrain(grid_width: usize, grid_height: usize) -> Terrain {
+    let mut rng = rand::rng();
+    let seed: u32 = rng.random();
+    return generate_terrain_seeded(seed, grid_width, grid_height);
+}
+pub fn generate_terrain_seeded(seed: u32, grid_width: usize, grid_height: usize) -> Terrain {
     let perlin = Perlin::new(seed);
     let mut terrain_tiles = vec![vec![Tile::Void; grid_width]; grid_height];
 
@@ -10,7 +16,7 @@ pub fn generate_terrain(seed: u32, grid_width: usize, grid_height: usize) -> Ter
     for y in 0..grid_height {
         for x in 0..grid_width {
             let value = perlin.get([x as f64 * scale, y as f64 * scale]);
-            terrain_tiles[y][x] = if value > 0.0 { Tile::Wall } else { Tile::Floor };
+            terrain_tiles[y][x] = tile::get_tile_by_f64(value);
         }
     }
 

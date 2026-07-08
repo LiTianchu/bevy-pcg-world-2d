@@ -75,6 +75,7 @@ impl Terrain {
         let tile: Tile = self.tile(x, y)?;
         match tile {
             Tile::Floor => Ok(true),
+            Tile::Grass => Ok(true),
             _ => Ok(false),
         }
     }
