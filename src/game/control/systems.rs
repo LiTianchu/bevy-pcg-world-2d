@@ -14,8 +14,6 @@ pub fn handle_player_movement(
     query: Query<(&mut Transform, &Player, &mut Movable, &mut ObjectOnGrid)>,
 ) {
     let mut direction: Vec2 = Vec2::ZERO;
-    let terrain_chunk: &terrain::resources::TerrainChunk =
-        terrain.chunk_at(IVec2 { x: 0, y: 0 }).unwrap();
 
     if keyboard_input.pressed(KeyCode::KeyW) {
         direction.y = 1.0;
@@ -42,6 +40,8 @@ pub fn handle_player_movement(
             movable.last_step_time = None;
         }
 
+        let terrain_chunk: &terrain::resources::TerrainChunk =
+            terrain.chunk_of_pos(transform.translation).unwrap();
         let move_interval: f32 = movable.move_interval();
 
         // if last step time is reset or enough time has passed since the last step

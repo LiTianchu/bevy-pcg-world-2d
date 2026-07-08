@@ -38,6 +38,15 @@ impl TerrainWorld {
         self.chunks.get(&coord)
     }
 
+    pub fn chunk_of_pos(&self, pos: Vec3) -> Option<&TerrainChunk> {
+        let chunk_x = (pos.x / constants::TILE_SIZE / self.chunk_dimension.x as f32).floor() as i32;
+        let chunk_y = (pos.y / constants::TILE_SIZE / self.chunk_dimension.y as f32).floor() as i32;
+        self.chunk_at(IVec2 {
+            x: chunk_x,
+            y: chunk_y,
+        })
+    }
+
     pub fn chunk_dimension(&self) -> UVec2 {
         self.chunk_dimension.clone()
     }

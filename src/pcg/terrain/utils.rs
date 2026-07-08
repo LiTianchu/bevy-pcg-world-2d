@@ -26,6 +26,10 @@ pub fn pos_to_cell_local(pos: Vec3) -> UVec2 {
     return UVec2 { x, y };
 }
 
+pub fn pos_to_cell_world(pos: Vec3, terrain: &TerrainWorld) -> UVec2 {
+    todo!()
+}
+
 // round pos to cell
 pub fn cell_round(pos: Vec3) -> Vec3 {
     let x: f32 = (pos.x / constants::TILE_SIZE).round() * constants::TILE_SIZE;
