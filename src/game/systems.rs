@@ -24,6 +24,8 @@ pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::Ter
     let spawn_translation: Vec3 =
         terrain::utils::grid_to_pos(spawn_place.x as usize, spawn_place.y as usize).with_z(1.0);
 
+    let player_initial_speed: f32 = 7.0;
+
     commands.spawn((
         player,
         Transform::from_translation(spawn_translation),
@@ -32,7 +34,7 @@ pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::Ter
             custom_size: Some(terrain::constants::TILE_DIMESNION),
             ..default()
         },
-        Movable::new().with_speed(2.0),
+        Movable::new().with_speed(player_initial_speed),
         ObjectOnGrid::new().with_internal_translation(spawn_translation),
     ));
 }

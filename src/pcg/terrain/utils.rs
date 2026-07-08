@@ -26,7 +26,7 @@ pub fn grid_to_pos(x: usize, y: usize) -> Vec3 {
 }
 
 pub fn pos_to_grid(pos: Vec3) -> Vec3 {
-    let x: f32 = (pos.x / constants::TILE_SIZE).round();
-    let y: f32 = (pos.y / constants::TILE_SIZE).round();
+    let x: f32 = (pos.x / constants::TILE_SIZE).round() * constants::TILE_SIZE;
+    let y: f32 = (pos.y / constants::TILE_SIZE).round() * constants::TILE_SIZE;
     return Vec3 { x, y, z: pos.z };
 }

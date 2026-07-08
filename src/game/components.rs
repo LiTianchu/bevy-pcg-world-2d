@@ -20,11 +20,15 @@ impl ObjectOnGrid {
 #[derive(Component)]
 pub struct Movable {
     pub speed: f32,
+    pub last_step_time: Option<f64>,
 }
 
 impl Movable {
     pub fn new() -> Self {
-        Self { speed: 1.0 }
+        Self {
+            speed: 1.0,
+            last_step_time: None,
+        }
     }
 
     pub fn with_speed(mut self, new_speed: f32) -> Self {
