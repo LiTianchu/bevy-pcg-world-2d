@@ -22,7 +22,8 @@ pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::Ter
     );
 
     let spawn_translation: Vec3 =
-        terrain::utils::grid_to_pos(spawn_place.x as usize, spawn_place.y as usize).with_z(1.0);
+        terrain::utils::cell_coord_to_pos(spawn_place.x as usize, spawn_place.y as usize)
+            .with_z(1.0);
 
     let player_initial_speed: f32 = 7.0;
 

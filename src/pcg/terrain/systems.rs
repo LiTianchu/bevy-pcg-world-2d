@@ -10,7 +10,10 @@ pub fn draw_terrain(mut commands: Commands, terrain: Res<Terrain>) {
                 custom_size: Some(constants::TILE_DIMESNION),
                 ..default()
             },
-            Transform::from_translation(utils::grid_to_pos(coord.x as usize, coord.y as usize)),
+            Transform::from_translation(utils::cell_coord_to_pos(
+                coord.x as usize,
+                coord.y as usize,
+            )),
         ));
     }
 }

@@ -70,4 +70,12 @@ impl Terrain {
         }
         return found_set;
     }
+
+    pub fn is_tile_walkable(&self, x: usize, y: usize) -> Result<bool> {
+        let tile: Tile = self.tile(x, y)?;
+        match tile {
+            Tile::Floor => Ok(true),
+            _ => Ok(false),
+        }
+    }
 }
