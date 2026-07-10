@@ -53,16 +53,28 @@ impl TerrainWorld {
         )
     }
 
-    // pub fn chunk_mod_cell(&self, pos: Vec3) -> UVec2 {
-    //     let chunk_x = (pos.x / constants::TILE_SIZE / self.chunk_dimension.x as f32).floor() as i32;
-    //     let chunk_y = (pos.y / constants::TILE_SIZE / self.chunk_dimension.y as f32).floor() as i32;
-    //     let chunk_mod_x = (pos.x / constants::TILE_SIZE).rem_euclid(self.chunk_dimension.x as f32);
-    //     let chunk_mod_y = (pos.y / constants::TILE_SIZE).rem_euclid(self.chunk_dimension.y as f32);
-    //     UVec2 {
-    //         x: chunk_mod_x.round() as u32,
-    //         y: chunk_mod_y.round() as u32,
-    //     }
-    // }
+    pub fn chunk_of_world_ivec2(&self, coord: IVec2) -> (IVec2, Option<&TerrainChunk>) {
+        let chunk_x = (coord.x as f32 / self.chunk_dimension.x as f32).floor() as i32;
+        let chunk_y = (coord.y as f32 / self.chunk_dimension.y as f32).floor() as i32;
+        (
+            IVec2 {
+                x: chunk_x,
+                y: chunk_y,
+            },
+            self.chunk_at(IVec2 {
+                x: chunk_x,
+                y: chunk_y,
+            }),
+        )
+    }
+
+    pub fn tile_at_world_ivec2(&self, coord: IVec2) -> Result<Tile> {
+        let (_chunk_coord, chunk_option) = self.chunk_of_world_ivec2(coord);
+        let chunk: &TerrainChunk = chunk_option.ok_or("Chunk not generated yet")?;
+        let chunk_mod = self.chunk_mod_world_ivec2(coord);
+        chunk.tile(chunk_mod.x as usize, chunk_mod.y as usize)
+    }
+
 
     pub fn chunk_mod_pos(&self, pos: Vec3) -> Vec3 {
         let chunk_mod_x = (pos.x).rem_euclid(self.chunk_dimension.x as f32 * constants::TILE_SIZE);
@@ -71,6 +83,15 @@ impl TerrainWorld {
             x: chunk_mod_x as f32,
             y: chunk_mod_y as f32,
             z: pos.z,
+        }
+    }
+
+    pub fn chunk_mod_world_ivec2(&self, coord: IVec2) -> UVec2 {
+        let chunk_mod_x = (coord.x).rem_euclid(self.chunk_dimension.x as i32) as u32;
+        let chunk_mod_y = (coord.y).rem_euclid(self.chunk_dimension.y as i32) as u32;
+        UVec2 {
+            x: chunk_mod_x,
+            y: chunk_mod_y,
         }
     }
 

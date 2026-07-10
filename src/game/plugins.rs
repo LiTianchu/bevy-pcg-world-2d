@@ -19,6 +19,7 @@ impl Plugin for WorldPlugin {
                 (
                     game::control::systems::handle_player_movement,
                     game::camera::systems::camera_follow_player,
+                    game::systems::render_ascii,
                 )
                     .chain(),
             );

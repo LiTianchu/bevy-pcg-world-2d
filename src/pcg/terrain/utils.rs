@@ -33,6 +33,12 @@ pub fn pos_to_cell_world(pos: Vec3, terrain: &TerrainWorld) -> (IVec2, UVec2) {
     })
 }
 
+pub fn get_world_ivec2(chunk_coord: IVec2, cell_coord: UVec2) -> IVec2 {
+    let x: i32 = chunk_coord.x * constants::DEFAULT_CHUNK_WIDTH as i32 + cell_coord.x as i32;
+    let y: i32 = chunk_coord.y * constants::DEFAULT_CHUNK_HEIGHT as i32 + cell_coord.y as i32;
+    return IVec2 { x, y };
+}
+
 // round pos to cell
 pub fn cell_round(pos: Vec3) -> Vec3 {
     let x: f32 = (pos.x / constants::TILE_SIZE).round() * constants::TILE_SIZE;
