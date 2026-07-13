@@ -52,7 +52,7 @@ pub fn tile_appearance_ascii(tile: Tile) -> char {
     tile_ascii
 }
 
-pub fn tile_appearance(tile: Tile) -> Color {
+pub fn tile_color(tile: Tile) -> Color {
     let color: Color = match tile {
         Tile::Wall => Color::srgba_u8(86, 86, 71, 255),
         Tile::Water => Color::srgba_u8(37, 178, 169, 255),

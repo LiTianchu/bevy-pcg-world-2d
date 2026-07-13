@@ -6,13 +6,13 @@ use crate::{
         player::components::Player,
         utils::try_move,
     },
-    pcg::{terrain, terrain::tile},
+    pcg::terrain::{self, tile},
 };
 use bevy::prelude::*;
 use crossterm::{
     ExecutableCommand, QueueableCommand, cursor, event,
     event::KeyCode as CrosstermKeyCode,
-    style::{self, Stylize},
+    style::{self, Color as CrosstermColor, Stylize},
     terminal,
 };
 use std::io::{Write, stdout};
@@ -97,14 +97,22 @@ pub fn render_ascii(
 
         for y in (lower_left.y)..=(upper_right.y) {
             for x in (lower_left.x)..=(upper_right.x) {
-                let tile_char: char = terrain
+                let tile_type: tile::Tile = terrain
                     .tile_at_world_ivec2(IVec2 { x, y })
-                    .map_or(' ', |t| tile::tile_appearance_ascii(t));
+                    .unwrap_or(tile::Tile::Void);
+                let tile_char: char = tile::tile_appearance_ascii(tile_type);
+                let color: Srgba = tile::tile_color(tile_type).to_srgba();
 
                 let local_x = (x - lower_left.x) as u16;
                 let local_y = (upper_right.y - y) as u16; // invert y for terminal coordinates
                 so.queue(cursor::MoveTo(local_x, local_y))?;
-                so.queue(style::PrintStyledContent(tile_char.white()))?;
+                so.queue(style::PrintStyledContent(tile_char.with(
+                    CrosstermColor::Rgb {
+                        r: (color.red.clamp(0.0, 1.0) * 255.0) as u8,
+                        g: (color.green.clamp(0.0, 1.0) * 255.0) as u8,
+                        b: (color.blue.clamp(0.0, 1.0) * 255.0) as u8,
+                    },
+                )))?;
             }
         }
         so.flush()?;

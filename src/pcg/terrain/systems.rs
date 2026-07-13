@@ -1,4 +1,4 @@
-use crate::pcg::terrain::{constants, resources::TerrainWorld, tile::tile_appearance, utils};
+use crate::pcg::terrain::{constants, resources::TerrainWorld, tile::tile_color, utils};
 
 use bevy::prelude::*;
 
@@ -8,7 +8,7 @@ pub fn draw_terrain(mut commands: Commands, terrain: Res<TerrainWorld>) {
         for (tile_coord, tile) in chunk.tiles_iter() {
             commands.spawn((
                 Sprite {
-                    color: tile_appearance(tile),
+                    color: tile_color(tile),
                     custom_size: Some(constants::TILE_DIMESNION),
                     ..default()
                 },
