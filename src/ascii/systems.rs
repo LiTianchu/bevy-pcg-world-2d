@@ -12,6 +12,7 @@ use bevy::prelude::*;
 use crossterm::{
     ExecutableCommand, QueueableCommand, cursor, event,
     event::KeyCode as CrosstermKeyCode,
+    execute,
     style::{self, Color as CrosstermColor, Stylize},
     terminal,
 };
@@ -38,8 +39,12 @@ pub fn read_terminal_input(mut terminal_input: ResMut<TerminalInput>) {
     }
 }
 
-pub fn setup_terminal() {
+pub fn setup_terminal() -> Result<()> {
+    let mut out = stdout();
+    execute!(out, cursor::Hide)?;
     let _ = terminal::enable_raw_mode();
+    out.execute(terminal::Clear(terminal::ClearType::All))?;
+    Ok(())
 }
 
 #[allow(dead_code)]
@@ -58,7 +63,7 @@ pub fn render_ascii(
             Changed<Transform>,
         ),
     >,
-) -> Result {
+) -> Result<()> {
     let mut so = stdout();
 
     if let Ok(player_transform) = player_query.single() {
@@ -77,11 +82,7 @@ pub fn render_ascii(
             y: camera_height / 2,
         };
 
-        let Ok(_cmd) = so.execute(terminal::Clear(terminal::ClearType::All)) else {
-            return Err("Failed to clear terminal".into());
-        };
-
-        let Ok(_cmd) = so.execute(cursor::MoveTo(0, 0)) else {
+        let Ok(_cmd) = so.queue(cursor::MoveTo(0, 0)) else {
             return Err("Failed to move cursor to (0, 0)".into());
         };
 
