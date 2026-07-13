@@ -8,6 +8,7 @@ pub const TILE_SIZE: f32 = 16.0;
 pub const TILE_DIMESNION: Vec2 = Vec2::splat(TILE_SIZE);
 pub const DEFAULT_TERRAIN_WORLD_SEED: u32 = 69;
 pub const PERLIN_NOISE_SCALE: f64 = 0.005;
+#[allow(dead_code)]
 pub const DEFAULT_CHUNK_CENTER: Vec2 = Vec2 {
     x: (DEFAULT_CHUNK_WIDTH as f32 * TILE_SIZE) / 2.0,
     y: (DEFAULT_CHUNK_HEIGHT as f32 * TILE_SIZE) / 2.0,

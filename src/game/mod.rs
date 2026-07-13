@@ -1,4 +1,3 @@
-pub mod ascii;
 pub mod camera;
 pub mod components;
 pub mod constants;
@@ -6,3 +5,4 @@ pub mod control;
 pub mod player;
 pub mod plugins;
 pub mod systems;
+pub mod utils;

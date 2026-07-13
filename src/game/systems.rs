@@ -1,14 +1,12 @@
 use crate::{
     game::{
         components::{Movable, ObjectOnGrid},
-        constants,
         player::components::Player,
     },
-    pcg::{terrain, terrain::tile},
+    pcg::terrain,
 };
 use bevy::prelude::*;
 use std::collections::HashSet;
-use std::io::{Write, stdout};
 
 pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::TerrainWorld>) {
     let player: Player = Player::new("Player");
