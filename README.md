@@ -4,7 +4,9 @@ This project demonstrates a minimal working 2D Procedural Content Generation Wor
 
 ## Running
 
-There are 2 ways to visualize the generated world: Window/Terminal Ascii
+There are 2 ways to visualize the generated world:   
+1. Window  
+2. Terminal ASCII  
 
 ### Window
 
@@ -14,7 +16,7 @@ cargo run
 
 <img src="assets/window_demo.png" alt="Window demo"/>
 
-### Terminal Ascii
+### Terminal ASCII
 
 ```
 cargo run -- --ascii
