@@ -1,6 +1,6 @@
 # Bevy 2D Procedural Content Generation World
 
-This project demonstrates a minimal working 2D Procedural Content Generation World made using the Bevy game engine and Rust language.
+This project demonstrates a minimal working 2D Procedural Content Generation World made using the Bevy game engine and Rust language for reference purposes and personal learning.
 
 ## Running
 
