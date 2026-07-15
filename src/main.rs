@@ -10,7 +10,7 @@ mod pcg;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.contains(&"--window".to_string()) {
+    if args.contains(&"--ascii".to_string()) {
         App::new()
             .add_plugins(DefaultPlugins)
             .add_plugins(WorldPlugin)

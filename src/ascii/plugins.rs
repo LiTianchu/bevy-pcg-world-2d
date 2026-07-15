@@ -21,6 +21,7 @@ impl Plugin for AsciiWorldPlugin {
                     ascii::systems::handle_terminal_player_movement
                         .after(ascii::systems::read_terminal_input),
                     ascii::systems::render_ascii,
+                    ascii::systems::handle_terminal_quit_game,
                 )
                     .chain(),
             );

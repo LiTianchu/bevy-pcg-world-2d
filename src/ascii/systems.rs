@@ -121,6 +121,16 @@ pub fn render_ascii(
     Ok(())
 }
 
+pub fn handle_terminal_quit_game(
+    terminal_input: Res<TerminalInput>,
+    mut app_exit_events: MessageWriter<AppExit>,
+) {
+    if let Some(CrosstermKeyCode::Char('q')) = terminal_input.pressed_key {
+        app_exit_events.write(AppExit::default());
+        cleanup_terminal();
+    }
+}
+
 pub fn handle_terminal_player_movement(
     terrain: Res<terrain::resources::TerrainWorld>,
     time: Res<Time>,
