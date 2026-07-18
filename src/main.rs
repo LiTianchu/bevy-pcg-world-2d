@@ -1,4 +1,4 @@
-use crate::game::plugins::WorldPlugin;
+use crate::{ascii::plugins::AsciiWorldPlugins, game::plugins::WorldPlugins};
 use bevy::app::{App, ScheduleRunnerPlugin};
 use bevy::prelude::*;
 use std::env;
@@ -15,13 +15,13 @@ fn main() {
             .add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
                 Duration::from_secs_f64(1.0 / 30.0),
             )))
-            .add_plugins(ascii::plugins::AsciiWorldPlugin)
+            .add_plugins(AsciiWorldPlugins)
             .run();
         return;
     } else {
         App::new()
             .add_plugins(DefaultPlugins)
-            .add_plugins(WorldPlugin)
+            .add_plugins(WorldPlugins)
             .run();
     }
 }

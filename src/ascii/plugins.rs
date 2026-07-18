@@ -5,8 +5,8 @@ use crate::{
 };
 use bevy::prelude::*;
 
-pub struct AsciiWorldPlugin;
-impl Plugin for AsciiWorldPlugin {
+pub struct AsciiWorldPlugins;
+impl Plugin for AsciiWorldPlugins {
     fn build(&self, app: &mut App) {
         app.init_resource::<TerminalInput>()
             .insert_resource(terrain::utils::generate_terrain().with_seed(69))

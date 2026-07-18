@@ -1,8 +1,8 @@
 use crate::{game, pcg::terrain};
 use bevy::prelude::*;
 
-pub struct WorldPlugin;
-impl Plugin for WorldPlugin {
+pub struct WorldPlugins;
+impl Plugin for WorldPlugins {
     fn build(&self, app: &mut App) {
         app.insert_resource(terrain::utils::generate_terrain().with_seed(69))
             .add_systems(
