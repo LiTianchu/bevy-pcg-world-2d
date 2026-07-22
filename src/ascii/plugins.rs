@@ -9,10 +9,14 @@ pub struct AsciiWorldPlugins;
 impl Plugin for AsciiWorldPlugins {
     fn build(&self, app: &mut App) {
         app.init_resource::<TerminalInput>()
-            .insert_resource(terrain::utils::generate_terrain().with_seed(69))
             .add_systems(
                 Startup,
-                (ascii::systems::setup_terminal, game::systems::spawn_player).chain(),
+                (
+                    terrain::systems::generate_terrain,
+                    ascii::systems::setup_terminal,
+                    game::systems::spawn_player,
+                )
+                    .chain(),
             )
             .add_systems(
                 Update,

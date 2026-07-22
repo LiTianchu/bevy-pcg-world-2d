@@ -1,6 +1,12 @@
-use crate::pcg::terrain::{constants, resources::TerrainWorld, tile::tile_color, utils};
+use crate::pcg::terrain::{
+    constants, resources::TerrainSeed, resources::TerrainWorld, tile::tile_color, utils,
+};
 
 use bevy::prelude::*;
+
+pub fn generate_terrain(mut command: Commands, seed: Res<TerrainSeed>) {
+    command.insert_resource(utils::generate_terrain().with_seed(seed.0));
+}
 
 pub fn draw_terrain(mut commands: Commands, terrain: Res<TerrainWorld>) {
     let terrain: &TerrainWorld = &terrain;

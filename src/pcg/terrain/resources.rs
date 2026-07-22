@@ -8,6 +8,9 @@ use std::fmt::{self, Write};
 use std::hash::{Hash, Hasher};
 
 #[derive(Resource)]
+pub struct TerrainSeed(pub u32);
+
+#[derive(Resource)]
 pub struct TerrainWorld {
     chunks: HashMap<IVec2, TerrainChunk>,
     chunk_dimension: UVec2,
