@@ -31,6 +31,19 @@ cargo run -- --ascii
 
 <img src="assets/ascii_demo.png" alt="Window demo"/>
 
+## Flags
+
+- `--no-collision`: Turn off collision checking
+- `--seed <seed_value>`: Generate the world with a seed value \[0, 4294967295\]
+- `--ascii`: Run the generation in Terminal ASCII view
+
+**Example:**  
+
+```
+# Runs the demo in ASCII mode, with generation seed = 69 and no collision
+cargo run -- --no-collision --seed 69 --ascii
+```
+
 ## Moving Around
 
 - `w/s/a/d` to move around the generated world

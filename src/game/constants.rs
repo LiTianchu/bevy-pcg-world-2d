@@ -5,4 +5,4 @@ pub const ASCII_CAMERA_SIZE: u32 = 5;
 pub const DEFAULT_PLAYER_NAME: &str = "Player";
 pub const DEFAULT_PLAYER_ASCII_APPEARANCE: char = '@';
 pub const DEFAULT_PLAYER_ASCII_COLOR: crossterm::style::Color = crossterm::style::Color::Red;
-pub const PLAYER_INITIAL_SPEED: f32 = 100.0;
+pub const PLAYER_INITIAL_SPEED: f32 = 10.0;

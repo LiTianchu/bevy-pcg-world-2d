@@ -13,3 +13,4 @@ pub const DEFAULT_CHUNK_CENTER: Vec2 = Vec2 {
     x: (DEFAULT_CHUNK_WIDTH as f32 * TILE_SIZE) / 2.0,
     y: (DEFAULT_CHUNK_HEIGHT as f32 * TILE_SIZE) / 2.0,
 };
+pub const DEFAULT_TILE_PATH: &str = "tiles/white.png";

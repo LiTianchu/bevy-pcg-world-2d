@@ -4,6 +4,7 @@ use crate::{
 };
 use bevy::app::{App, ScheduleRunnerPlugin};
 use bevy::prelude::*;
+use rand::prelude::*;
 use std::env;
 use std::time::Duration;
 
@@ -16,7 +17,7 @@ mod pcg;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let mut seed: u32 = terrain::constants::DEFAULT_TERRAIN_WORLD_SEED;
+    let seed: u32;
 
     if args.contains(&"--seed".to_string()) {
         let seed_index: usize = args
@@ -32,6 +33,9 @@ fn main() {
         seed = args[seed_index]
             .parse::<u32>()
             .expect("Seed value must be a non-negative number not larger than 4,294,967,295");
+    } else {
+        let mut rng = rand::rng();
+        seed = rng.random_range(0..=u32::MAX);
     }
 
     let mut collision_enabled: bool = true;

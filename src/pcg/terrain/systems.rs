@@ -7,7 +7,12 @@ use crate::{
         utils,
     },
 };
+
 use bevy::prelude::*;
+use bevy::{
+    image::{ImageArrayLayout, ImageLoaderSettings},
+    sprite_render::{TileData, TilemapChunk, TilemapChunkTileData},
+};
 use std::collections::HashSet;
 
 pub fn generate_terrain(mut command: Commands, seed: Res<TerrainSeed>) {
@@ -39,15 +44,25 @@ pub fn try_regenerate_terrain_around_player(
 
 pub fn draw_terrain(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     terrain: Res<TerrainWorld>,
-    rendered_chunks_query: Query<(Entity, &RenderedChunk)>,
+    rendered_chunks: Query<(Entity, &RenderedChunk)>,
+    mut cached_tileset: Local<Option<Handle<Image>>>,
 ) {
-    let terrain: &TerrainWorld = &terrain;
+    let tileset = cached_tileset
+        .get_or_insert_with(|| {
+            asset_server
+                .load_builder()
+                .with_settings(|settings: &mut ImageLoaderSettings| {
+                    settings.array_layout = Some(ImageArrayLayout::RowCount { rows: 2 });
+                })
+                .load(constants::DEFAULT_TILE_PATH)
+        })
+        .clone();
+
     let mut rendered_chunk_coords = HashSet::new();
 
-    for (entity, rendered_chunk) in &rendered_chunks_query {
-        // if chunk no longer exists in the terrain
-        // or if chunk is already rendered (duplicate)
+    for (entity, rendered_chunk) in &rendered_chunks {
         if terrain.chunk_at(rendered_chunk.0).is_none()
             || !rendered_chunk_coords.insert(rendered_chunk.0)
         {
@@ -57,7 +72,13 @@ pub fn draw_terrain(
 
     for (chunk_coord, chunk) in terrain.chunks_iter() {
         if !rendered_chunk_coords.contains(chunk_coord) {
-            draw_chunk(&mut commands, chunk, chunk_coord, terrain);
+            draw_chunk(
+                &mut commands,
+                chunk,
+                *chunk_coord,
+                &terrain,
+                tileset.clone(),
+            );
         }
     }
 }
@@ -65,30 +86,36 @@ pub fn draw_terrain(
 fn draw_chunk(
     commands: &mut Commands,
     chunk: &TerrainChunk,
-    chunk_coord: &IVec2,
+    chunk_coord: IVec2,
     terrain: &TerrainWorld,
+    tileset: Handle<Image>,
 ) {
-    commands
-        .spawn((
-            RenderedChunk::new(chunk_coord.clone()),
-            Transform::default(),
-            Visibility::default(),
-        ))
-        .with_children(|parent| {
-            for (tile_coord, tile) in chunk.tiles_iter() {
-                parent.spawn((
-                    Sprite {
-                        color: tile_color(tile),
-                        custom_size: Some(constants::TILE_DIMESNION),
-                        ..default()
-                    },
-                    Transform::from_translation(utils::cell_to_pos_world(
-                        tile_coord.x as usize,
-                        tile_coord.y as usize,
-                        chunk_coord.clone(),
-                        terrain,
-                    )),
-                ));
-            }
-        });
+    // build tile data for the chunk
+    let tile_data = chunk
+        .tiles_iter()
+        .map(|(_, tile)| {
+            Some(TileData {
+                color: tile_color(tile),           // set tile color based on tile type
+                ..TileData::from_tileset_index(0)  // select timemap layer 0
+            })
+        })
+        .collect();
+
+    let chunk_size = chunk.dimension();
+
+    // TilemapChunk is centered, while the current world coordinates place tile (0, 0) at the chunk origin.
+    let origin = utils::cell_to_pos_world(0, 0, chunk_coord, terrain);
+    let center_offset = (chunk_size.as_vec2() - Vec2::ONE) * constants::TILE_SIZE * 0.5;
+
+    commands.spawn((
+        RenderedChunk::new(chunk_coord),
+        TilemapChunk {
+            chunk_size,
+            tile_display_size: UVec2::splat(constants::TILE_SIZE as u32),
+            tileset,
+            ..default()
+        },
+        TilemapChunkTileData(tile_data),
+        Transform::from_translation(origin + center_offset.extend(0.0)),
+    ));
 }
