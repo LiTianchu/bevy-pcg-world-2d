@@ -129,31 +129,26 @@ impl TerrainWorld {
         self.chunks.entry(coord).or_insert(new_chunk);
     }
 
-    pub fn free_chunks_at_rect(&mut self, region: IRect) -> Option<Vec<IVec2>> {
-        let mut removed_chunks: Vec<IVec2> = vec![];
-        for x in region.min.x..=region.max.x {
-            for y in region.min.y..=region.max.y {
-                let coord = IVec2 { x, y };
-                if let Some(removed_coord) = self.free_chunk_at(coord) {
-                    removed_chunks.push(removed_coord);
-                }
+    pub fn free_chunks_outside_cluster_at(
+        &mut self,
+        center_chunk: IVec2,
+        extent: u32,
+    ) -> Vec<IVec2> {
+        let mut removed_chunks = Vec::new();
+
+        // only keep chunks within the cluster extent, remove all other chunks
+        self.chunks.retain(|coord, _chunk| {
+            let should_keep = coord.x.abs_diff(center_chunk.x) <= extent
+                && coord.y.abs_diff(center_chunk.y) <= extent;
+
+            if !should_keep {
+                removed_chunks.push(*coord);
             }
-        }
 
-        if removed_chunks.is_empty() {
-            None
-        } else {
-            Some(removed_chunks)
-        }
-    }
+            should_keep
+        });
 
-    pub fn free_chunk_at(&mut self, coord: IVec2) -> Option<IVec2> {
-        if self.chunks.contains_key(&coord) {
-            self.chunks.remove(&coord);
-            Some(coord)
-        } else {
-            None
-        }
+        removed_chunks
     }
 
     pub fn is_tile_walkable(&self, chunk_coord: IVec2, tile_coord: UVec2) -> Result<bool> {
@@ -200,6 +195,35 @@ impl TerrainWorld {
         }
 
         return IRect::new(min_x, min_y, max_x, max_y);
+    }
+
+    #[allow(dead_code)]
+    pub fn free_chunks_at_rect(&mut self, region: IRect) -> Option<Vec<IVec2>> {
+        let mut removed_chunks: Vec<IVec2> = vec![];
+        for x in region.min.x..=region.max.x {
+            for y in region.min.y..=region.max.y {
+                let coord = IVec2 { x, y };
+                if let Some(removed_coord) = self.free_chunk_at(coord) {
+                    removed_chunks.push(removed_coord);
+                }
+            }
+        }
+
+        if removed_chunks.is_empty() {
+            None
+        } else {
+            Some(removed_chunks)
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn free_chunk_at(&mut self, coord: IVec2) -> Option<IVec2> {
+        if self.chunks.contains_key(&coord) {
+            self.chunks.remove(&coord);
+            Some(coord)
+        } else {
+            None
+        }
     }
 
     fn compute_chunk_seed(&self, coord: IVec2) -> u32 {
@@ -301,6 +325,7 @@ impl TerrainChunk {
         }
     }
 
+    #[allow(dead_code)]
     pub fn tiles_of_type(&self, tile_type: Tile) -> HashSet<UVec2> {
         let dim: UVec2 = self.dimension();
         let mut found_set: HashSet<UVec2> = HashSet::new();
@@ -312,6 +337,21 @@ impl TerrainChunk {
             }
         }
         return found_set;
+    }
+
+    #[allow(dead_code)]
+    pub fn tiles_of_type_sorted(&self, tile_type: Tile) -> Vec<UVec2> {
+        let dim: UVec2 = self.dimension();
+        let mut found_vec: Vec<UVec2> = Vec::new();
+        for y in 0..dim.y {
+            for x in 0..dim.x {
+                if self.tiles[y as usize][x as usize] == tile_type {
+                    found_vec.push(UVec2 { x: x, y: y });
+                }
+            }
+        }
+
+        found_vec
     }
 
     pub fn is_tile_walkable(&self, x: usize, y: usize) -> Result<bool> {
@@ -335,5 +375,14 @@ impl fmt::Display for TerrainChunk {
         }
 
         Ok(())
+    }
+}
+
+#[derive(Component, Debug)]
+pub struct RenderedChunk(pub IVec2);
+
+impl RenderedChunk {
+    pub fn new(coord: IVec2) -> Self {
+        Self(coord)
     }
 }

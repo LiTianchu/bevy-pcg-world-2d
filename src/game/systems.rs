@@ -7,7 +7,6 @@ use crate::{
     pcg::terrain,
 };
 use bevy::prelude::*;
-use std::collections::HashSet;
 
 pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::TerrainWorld>) {
     let player: Player = Player::new(constants::DEFAULT_PLAYER_NAME)
@@ -16,7 +15,7 @@ pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::Ter
 
     let chunk: &terrain::resources::TerrainChunk = terrain.chunk_at(IVec2 { x: 0, y: 0 }).unwrap();
 
-    let tiles: HashSet<UVec2> = chunk.tiles_of_type(terrain::tile::Tile::Floor);
+    let tiles: Vec<UVec2> = chunk.tiles_of_type_sorted(terrain::tile::Tile::Floor);
 
     let default_spawn_place: UVec2 = UVec2 { x: 0, y: 0 };
     let spawn_place: UVec2 = tiles.iter().next().copied().unwrap_or(default_spawn_place);

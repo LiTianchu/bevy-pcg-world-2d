@@ -9,6 +9,7 @@ use std::time::Duration;
 
 mod ascii;
 mod game;
+#[allow(dead_code)]
 mod helper;
 mod pcg;
 
@@ -49,7 +50,7 @@ fn main() {
             .insert_resource(game_config_resource)
             .insert_resource(terrain_seed_resource)
             .add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
-                Duration::from_secs_f64(1.0 / 30.0),
+                Duration::from_secs_f64(1.0 / 60.0),
             )))
             .add_plugins(AsciiWorldPlugins)
             .run();

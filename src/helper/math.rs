@@ -2,7 +2,7 @@ use bevy::prelude::*;
 /// Returns a vector of new IRect representing the area of rect_a that is not overlapped with rect_b.
 pub fn except_rect(rect_a: &IRect, rect_b: &IRect) -> Vec<IRect> {
     // if rect_a and rect_b do not intersect, return rect_a as the only remaining area.
-    if !rect_a.intersect(*rect_b).is_empty() {
+    if rect_a.intersect(*rect_b).is_empty() {
         return vec![*rect_a];
     }
 
