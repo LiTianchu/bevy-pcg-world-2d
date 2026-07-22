@@ -1,12 +1,60 @@
 # Bevy 2D Procedural Content Generation World
 
-This project demonstrates a minimal working 2D procedural world made using the Bevy game engine and Rust language that can be used as a kickstarter for anyone who likes to build 2D grid-based procedural generation games.
+This project demonstrates a minimal working 2D procedural world made using the Bevy game engine and Rust language that can be used as a kickstarter for anyone who likes to build 2D grid-based procedural generation games.  
+
+<img src="assets/ascii_demo.png" alt="Window demo"/>  
 
 ## Tool
 
 - Engine: Bevy 0.19.0
 - Language: Rust 1.95.0
 - Package Manager: Cargo 1.95.0
+
+## Project Structure
+
+```text
+.
+├── assets/
+│   ├── tiles/
+│   │   └── white.png
+├── src/
+│   ├── ascii/
+│   │   ├── mod.rs
+│   │   ├── plugins.rs
+│   │   ├── resources.rs
+│   │   └── systems.rs
+│   ├── game/
+│   │   ├── camera/
+│   │   │   ├── mod.rs
+│   │   │   └── systems.rs
+│   │   ├── control/
+│   │   │   ├── mod.rs
+│   │   │   └── systems.rs
+│   │   ├── player/
+│   │   │   ├── components.rs
+│   │   │   └── mod.rs
+│   │   ├── components.rs
+│   │   ├── constants.rs
+│   │   ├── mod.rs
+│   │   ├── plugins.rs
+│   │   ├── resources.rs
+│   │   ├── systems.rs
+│   │   └── utils.rs
+│   ├── helper/
+│   │   ├── math.rs
+│   │   └── mod.rs
+│   ├── pcg/
+│   │   ├── terrain/
+│   │   │   ├── constants.rs
+│   │   │   ├── mod.rs
+│   │   │   ├── resources.rs
+│   │   │   ├── systems.rs
+│   │   │   ├── tile.rs
+│   │   │   └── utils.rs
+│   │   └── mod.rs
+│   └── main.rs
+├── Cargo.toml
+```
 
 ## Running
 
