@@ -10,11 +10,11 @@ use crate::{
 };
 use bevy::prelude::*;
 use crossterm::{
-    ExecutableCommand, QueueableCommand, cursor, event,
+    QueueableCommand, cursor, event,
     event::KeyCode as CrosstermKeyCode,
     execute,
     style::{self, Color as CrosstermColor, Stylize},
-    terminal,
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{Write, stdout};
 use std::time::Duration;
@@ -41,15 +41,24 @@ pub fn read_terminal_input(mut terminal_input: ResMut<TerminalInput>) {
 
 pub fn setup_terminal() -> Result<()> {
     let mut out = stdout();
-    execute!(out, cursor::Hide)?;
-    let _ = terminal::enable_raw_mode();
-    out.execute(terminal::Clear(terminal::ClearType::All))?;
+    terminal::enable_raw_mode()?;
+    execute!(
+        out,
+        EnterAlternateScreen,
+        cursor::Hide,
+        terminal::Clear(terminal::ClearType::All),
+        cursor::MoveTo(0, 0),
+    )?;
     Ok(())
 }
 
-#[allow(dead_code)]
-pub fn cleanup_terminal() {
-    let _ = terminal::disable_raw_mode();
+pub fn cleanup_terminal() -> Result<()> {
+    let restore_screen_result = execute!(stdout(), cursor::Show, LeaveAlternateScreen);
+    let disable_raw_mode_result = terminal::disable_raw_mode();
+
+    restore_screen_result?;
+    disable_raw_mode_result?;
+    Ok(())
 }
 
 pub fn render_ascii(
@@ -124,11 +133,13 @@ pub fn render_ascii(
 pub fn handle_terminal_quit_game(
     terminal_input: Res<TerminalInput>,
     mut app_exit_events: MessageWriter<AppExit>,
-) {
+) -> Result<()> {
     if let Some(CrosstermKeyCode::Char('q')) = terminal_input.pressed_key {
         app_exit_events.write(AppExit::default());
-        cleanup_terminal();
+        cleanup_terminal()?;
     }
+
+    Ok(())
 }
 
 pub fn handle_terminal_player_movement(
