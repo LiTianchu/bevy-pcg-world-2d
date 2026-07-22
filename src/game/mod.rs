@@ -4,5 +4,6 @@ pub mod constants;
 pub mod control;
 pub mod player;
 pub mod plugins;
+pub mod resources;
 pub mod systems;
 pub mod utils;

@@ -17,15 +17,14 @@ pub fn generate_terrain(mut command: Commands, seed: Res<TerrainSeed>) {
 
 pub fn try_regenerate_terrain_around_player(
     mut terrain: ResMut<TerrainWorld>,
-    player_query: Query<&Transform, (With<Player>, With<ObjectOnGrid>)>,
+    player_query: Query<&Transform, (With<Player>, With<ObjectOnGrid>, Changed<Transform>)>,
 ) {
     if let Ok(player_transform) = player_query.single() {
         let (chunk_coord_below, _local_coord_below) =
             utils::pos_to_cell_world(player_transform.translation, &terrain);
 
-        print!("Chunk coord below: {}", chunk_coord_below);
         let should_generate: bool = !terrain.is_chunk_coord_at_cluster_center(chunk_coord_below);
-        print!("Should Regenerate: {}", should_generate);
+
         if should_generate {
             let old_rect: IRect = terrain.compute_chunk_coord_rect();
             terrain.generate_chunk_cluster_at(
@@ -35,7 +34,9 @@ pub fn try_regenerate_terrain_around_player(
             let new_rect: IRect = terrain.compute_chunk_coord_rect();
             let excepted_rects: Vec<IRect> = old_rect.except(&new_rect);
             for excepted_rect in excepted_rects {
-                // TODO: despawn chunks in excepted_rect
+                let Some(_removed_chunk_coords) = terrain.free_chunks_at_rect(excepted_rect) else {
+                    continue;
+                };
             }
         }
     }

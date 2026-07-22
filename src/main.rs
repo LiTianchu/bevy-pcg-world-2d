@@ -1,5 +1,7 @@
 use crate::pcg::terrain;
-use crate::{ascii::plugins::AsciiWorldPlugins, game::plugins::WorldPlugins};
+use crate::{
+    ascii::plugins::AsciiWorldPlugins, game::plugins::WorldPlugins, game::resources::GameConfig,
+};
 use bevy::app::{App, ScheduleRunnerPlugin};
 use bevy::prelude::*;
 use std::env;
@@ -30,10 +32,21 @@ fn main() {
             .parse::<u32>()
             .expect("Seed value must be a non-negative number not larger than 4,294,967,295");
     }
+
+    let mut collision_enabled: bool = true;
+    if args.contains(&"--no-collision".to_string()) {
+        collision_enabled = false;
+    }
+
     let terrain_seed_resource: terrain::resources::TerrainSeed =
         terrain::resources::TerrainSeed(seed);
+
+    let game_config_resource: GameConfig =
+        GameConfig::new().with_collision_enabled(collision_enabled);
+
     if args.contains(&"--ascii".to_string()) {
         App::new()
+            .insert_resource(game_config_resource)
             .insert_resource(terrain_seed_resource)
             .add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
                 Duration::from_secs_f64(1.0 / 30.0),
@@ -43,6 +56,7 @@ fn main() {
         return;
     } else {
         App::new()
+            .insert_resource(game_config_resource)
             .insert_resource(terrain_seed_resource)
             .add_plugins(DefaultPlugins)
             .add_plugins(WorldPlugins)

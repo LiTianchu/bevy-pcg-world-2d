@@ -4,6 +4,7 @@ use crate::{
         components::{Movable, ObjectOnGrid},
         constants,
         player::components::Player,
+        resources::GameConfig,
         utils::try_move,
     },
     pcg::terrain::{self, tile},
@@ -152,6 +153,7 @@ pub fn handle_terminal_player_movement(
     terrain: Res<terrain::resources::TerrainWorld>,
     time: Res<Time>,
     terminal_input: Res<TerminalInput>,
+    game_config: Res<GameConfig>,
     mut query: Query<
         (&mut Transform, &mut Movable, &mut ObjectOnGrid),
         (With<Player>, With<Movable>, With<ObjectOnGrid>),
@@ -188,6 +190,7 @@ pub fn handle_terminal_player_movement(
             &mut transform,
             &mut movable,
             &mut object_on_grid,
+            game_config.collision_enabled,
             direction,
             &time,
             &terrain,

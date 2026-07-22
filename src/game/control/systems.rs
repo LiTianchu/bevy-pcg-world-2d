@@ -2,6 +2,7 @@ use crate::{
     game::{
         components::{Movable, ObjectOnGrid},
         player::components::Player,
+        resources::GameConfig,
         utils::try_move,
     },
     pcg::terrain,
@@ -12,6 +13,7 @@ pub fn handle_player_movement(
     time: Res<Time>,
     keyboard_input: Option<Res<ButtonInput<KeyCode>>>,
     terrain: Res<terrain::resources::TerrainWorld>,
+    game_config: Res<GameConfig>,
     query: Query<(&mut Transform, &mut Movable, &mut ObjectOnGrid), With<Player>>,
 ) {
     let Some(keyboard_input) = keyboard_input else {
@@ -49,6 +51,7 @@ pub fn handle_player_movement(
             &mut transform,
             &mut movable,
             &mut object_on_grid,
+            game_config.collision_enabled,
             direction,
             &time,
             &terrain,

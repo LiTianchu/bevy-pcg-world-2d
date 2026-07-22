@@ -125,17 +125,34 @@ impl TerrainWorld {
             self.chunk_dimension.x as usize,
             self.chunk_dimension.y as usize,
         );
-        println!("Generating new chunk at coord: {}, {}", coord.x, coord.y);
 
         self.chunks.entry(coord).or_insert(new_chunk);
     }
 
-    pub fn free_chunk_at(&mut self, coord: IVec2) -> Result {
+    pub fn free_chunks_at_rect(&mut self, region: IRect) -> Option<Vec<IVec2>> {
+        let mut removed_chunks: Vec<IVec2> = vec![];
+        for x in region.min.x..=region.max.x {
+            for y in region.min.y..=region.max.y {
+                let coord = IVec2 { x, y };
+                if let Some(removed_coord) = self.free_chunk_at(coord) {
+                    removed_chunks.push(removed_coord);
+                }
+            }
+        }
+
+        if removed_chunks.is_empty() {
+            None
+        } else {
+            Some(removed_chunks)
+        }
+    }
+
+    pub fn free_chunk_at(&mut self, coord: IVec2) -> Option<IVec2> {
         if self.chunks.contains_key(&coord) {
             self.chunks.remove(&coord);
-            Ok(())
+            Some(coord)
         } else {
-            Err("Chunk not generated yet".into())
+            None
         }
     }
 

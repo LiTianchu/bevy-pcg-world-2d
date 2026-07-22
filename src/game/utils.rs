@@ -8,6 +8,7 @@ pub fn try_move(
     transform: &mut Transform,
     movable: &mut Movable,
     object_on_grid: &mut ObjectOnGrid,
+    collision_enabled: bool,
     direction: Vec2,
     time: &Res<Time>,
     terrain: &Res<terrain::resources::TerrainWorld>,
@@ -30,9 +31,10 @@ pub fn try_move(
 
     let (chunk_coord, next_cell_coord) = terrain::utils::pos_to_cell_world(next_grid_pos, &terrain);
 
-    let is_tile_walkable = terrain
-        .is_tile_walkable(chunk_coord, next_cell_coord)
-        .unwrap_or(false);
+    let is_tile_walkable = !collision_enabled
+        || (terrain
+            .is_tile_walkable(chunk_coord, next_cell_coord)
+            .unwrap_or(false));
 
     // execute the move only if the move is not in cooldown and the next tile is walkable
     if move_not_in_cooldown && is_tile_walkable {
