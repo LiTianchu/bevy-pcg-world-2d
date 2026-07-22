@@ -19,6 +19,7 @@ impl Plugin for WorldPlugins {
             (
                 game::control::systems::handle_player_movement,
                 game::camera::systems::camera_follow_player,
+                terrain::systems::try_regenerate_terrain_around_player,
             )
                 .chain(),
         );

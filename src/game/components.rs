@@ -15,6 +15,11 @@ impl ObjectOnGrid {
         self.internal_translation = translation;
         self
     }
+
+    #[allow(dead_code)]
+    pub fn set_internal_translation(&mut self, translation: Vec3) {
+        self.internal_translation = translation;
+    }
 }
 
 #[derive(Component)]

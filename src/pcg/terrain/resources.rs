@@ -125,6 +125,7 @@ impl TerrainWorld {
             self.chunk_dimension.x as usize,
             self.chunk_dimension.y as usize,
         );
+        println!("Generating new chunk at coord: {}, {}", coord.x, coord.y);
 
         self.chunks.entry(coord).or_insert(new_chunk);
     }
@@ -135,6 +136,44 @@ impl TerrainWorld {
             .ok_or("Chunk not generated yet")?;
 
         chunk.is_tile_walkable(tile_coord.x as usize, tile_coord.y as usize)
+    }
+
+    pub fn is_chunk_coord_at_cluster_center(&self, chunk_coord: IVec2) -> bool {
+        return self.normalize_chunk_coord(chunk_coord) == IVec2::ZERO;
+    }
+
+    pub fn normalize_chunk_coord(&self, chunk_coord: IVec2) -> IVec2 {
+        let chunk_rect: IRect = self.compute_chunk_coord_rect();
+
+        let chunk_center: IVec2 = chunk_rect.center();
+
+        // build normalized coord
+        let normalized_chunk_coord = chunk_coord - chunk_center;
+        return normalized_chunk_coord;
+    }
+
+    pub fn compute_chunk_coord_rect(&self) -> IRect {
+        let mut min_x = i32::MAX;
+        let mut min_y = i32::MAX;
+        let mut max_x = i32::MIN;
+        let mut max_y = i32::MIN;
+
+        for (chunk_coord, _chunk) in self.chunks_iter() {
+            if chunk_coord.x < min_x {
+                min_x = chunk_coord.x;
+            }
+            if chunk_coord.y < min_y {
+                min_y = chunk_coord.y;
+            }
+            if chunk_coord.x > max_x {
+                max_x = chunk_coord.x;
+            }
+            if chunk_coord.y > max_y {
+                max_y = chunk_coord.y;
+            }
+        }
+
+        return IRect::new(min_x, max_x, min_y, max_y);
     }
 
     fn compute_chunk_seed(&self, coord: IVec2) -> u32 {
