@@ -1,6 +1,7 @@
 use crate::{
     game::{
         components::{Movable, ObjectOnGrid},
+        constants,
         player::components::Player,
     },
     pcg::terrain,
@@ -9,9 +10,9 @@ use bevy::prelude::*;
 use std::collections::HashSet;
 
 pub fn spawn_player(mut commands: Commands, terrain: Res<terrain::resources::TerrainWorld>) {
-    let player: Player = Player::new("Player")
-        .with_ascii_appearance('@')
-        .with_ascii_color(crossterm::style::Color::Red);
+    let player: Player = Player::new(constants::DEFAULT_PLAYER_NAME)
+        .with_ascii_appearance(constants::DEFAULT_PLAYER_ASCII_APPEARANCE)
+        .with_ascii_color(constants::DEFAULT_PLAYER_ASCII_COLOR);
 
     let chunk: &terrain::resources::TerrainChunk = terrain.chunk_at(IVec2 { x: 0, y: 0 }).unwrap();
 
